@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css">
+    <title>Rezervimi i apartamentit</title>
+    <script>
+        function updatePhonePattern() {
+            const shteti = document.getElementById('shtet').value;
+            let pattern = '';
+
+            switch (shteti) {
+                case '+355':
+                    pattern = '\\+355[0-9]{8,10}';
+                    break;
+                case '+33': // France
+                    pattern = '\\+33[0-9]{9}';
+                    break;
+                case '+966': // Saudi Arabia
+                    pattern = '\\+966[0-9]{9}';
+                    break;
+                case '+34': // Spain
+                    pattern = '\\+34[0-9]{9}';
+                    break;
+                case '+30': // Greece
+                    pattern = '\\+30[0-9]{10}';
+                    break;
+                case '+39': // Italy
+                    pattern = '\\+39[0-9]{10}';
+                    break;
+                case '+383': // Kosovo
+                    pattern = '\\+383[0-9]{8}';
+                    break;
+                // Shtoni shabllonin e pattern-it për shtetet e tjera këtu
+                default:
+                    pattern = '\\+355[0-9]{8,10}'; // Shembulli i një shablloni default
+                    break;
+            }
+
+            document.getElementById('telefoni').setAttribute('pattern', pattern);
+
+            // Vendosja automatike e prefiksit të numrit të telefonit
+            document.getElementById('telefoni').value = shteti;
+        }
+    </script>
+</head>
+<body>
+    <h1>Rezervimi i apartamentit</h1>
+
+    <form method="post" action="rezervimi.php">
+        <label for="emri">Emri:</label>
+        <input type="text" id="emri" name="emri" required><br><br>
+
+        <label for="mbiemri">Mbiemri:</label>
+        <input type="text" id="mbiemri" name="mbiemri" required><br><br>
+
+        <label for="shtet">Zgjidhni shtetin:</label>
+        <select id="shtet" name="shtet" onchange="updatePhonePattern()" required>
+            <option value="+355">Shqipëri (+355)</option>
+            <option value="+49">Gjermani (+49)</option>
+            <option value="+1">USA (+1)</option>
+            <option value="+33">France (+33)</option>
+            <option value="+966">Saudi Arabia (+966)</option>
+            <option value="+34">Spain (+34)</option>
+            <option value="+30">Greece (+30)</option>
+            <option value="+39">Italy (+39)</option>
+            <option value="+383">Kosovo (+383)</option>
+            <!-- Shtoni opsionet për shtetet e tjera këtu -->
+        </select>
+
+        <label for="telefoni">Numri i telefonit:</label>
+        <input type="tel" id="telefoni" name="telefoni" required><br><br>
+
+        <label for="data_mberritjes">Data e mbërritjes:</label>
+        <input type="date" id="data_mberritjes" name="data_mberritjes" onchange="calculatePriceAndValidate()" required><br><br>
+
+        <label for="data_ikjes">Data e ikjes:</label>
+        <input type="date" id="data_ikjes" name="data_ikjes" onchange="calculatePriceAndValidate()" required><br><br>
+
+        <label for="cmimi">Çmimi:</label>
+        <input type="text" id="cmimi" name="cmimi" readonly><br><br>
+
+        <div class="wrapper">
+            <input type="submit" name="submit" value="Rezervo">
+        </div>
+    </form>
+
+    <script>
+        function calculatePriceAndValidate() {
+            const dataMberritjes = new Date(document.getElementById('data_mberritjes').value);
+            const dataIkjes = new Date(document.getElementById('data_ikjes').value);
+            const dataSot = new Date();
+            const dataZgjedhur = new Date(dataMberritjes);
+
+            // Validimi i datës
+            if (dataZgjedhur < dataSot) {
+                alert("Ju lutem, zgjidhni një datë të ardhshme.");
+                document.getElementById('data_mberritjes').value = dataSot.toISOString().split('T')[0];
+                return;
+            }
+
+            let cmimi = 0;
+
+            // Llogaritja e ditëve të qëndrimit
+            const ditetQendrimit = Math.ceil(Math.abs(dataMberritjes - dataIkjes) / (1000 * 60 * 60 * 24));
+
+            // Identifikimi i muajit të zgjedhur
+            const muaji = dataZgjedhur.getMonth() + 1; // Merret muaji nga 1 deri në 12
+
+            // Caktimi i çmimit në bazë të sezoni (dimër/verë)
+            if (muaji >= 6 && muaji <= 8) {
+                cmimi = 100; // Verë
+            } else {
+                cmimi = 50; // Dimër
+            }
+
+            // Llogaritja e çmimit total
+            const cmimiTotal = cmimi * ditetQendrimit;
+            document.getElementById('cmimi').value = cmimiTotal + ' EUR';
+        }
+
+        // Thirr updatePhonePattern për herë të parë për të vendosur pattern-in fillestar të telefonit
+        updatePhonePattern();
+    </script>
+
+    <footer>
+        <p>&copy; All rights reserved. Menaxhuar nga Devis Sherifaj 2024</p>
+    </footer>
+
+</body>
+</html>
+
+
